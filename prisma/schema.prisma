@@ -13,29 +13,73 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Video {
-  id    Int    @id @default(autoincrement())
-  name  String
-  video String
-  Schedule Schedule[]
+model User {
+  id             Int           @id @default(autoincrement())
+  fullname       String
+  username       String
+  emailaddress   String
+  userType       UserType[]
+  platform       Platform[]
+  VideoContent   VideoContent? @relation(fields: [videoContentId], references: [id])
+  videoContentId Int?
+}
+
+enum Role {
+  None
+  Editor
+  Moderator
+  Creator
+}
+
+model UserType {
+  id     Int   @id @default(autoincrement())
+  type   Role  @default(None)
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
+}
+
+//  have to make auth_keys or User_keys storage for different platforms
+
+enum PlatformName {
+  None
+  Youtube
+  Instagram
+  Twitter
+  Linkedin
+}
+
+model Platform {
+  id             Int           @id @default(autoincrement())
+  name           PlatformName  @default(None)
+  User           User?         @relation(fields: [userId], references: [id])
+  userId         Int?
+  VideoContent   VideoContent? @relation(fields: [videoContentId], references: [id])
+  videoContentId Int?
+}
+
+model VideoContent {
+  id        Int        @id @default(autoincrement())
+  name      String
+  platform  Platform[]
+  user      User[]
+  Schedule  Schedule[]
+  storeLink String
+}
+
+model StaticContent {
+  id        Int        @id @default(autoincrement())
+  name      String
+  video     String
+  isAuth    Boolean    @default(false)
+  Schedule  Schedule[]
+  storeLink String
 }
 
 model Schedule {
-  id      Int      @id @default(autoincrement())
-  date    DateTime
-  videoId Int
-  video   Video    @relation(fields: [videoId], references: [id])
-}
-
-model Editor {
-  id Int @id @default(autoincrement())
-}
-
-model Moderator {
-  id Int @id @default(autoincrement())
-}
-
-model Creator {
-  id Int @id @default(autoincrement())
-  
+  id               Int            @id @default(autoincrement())
+  date             DateTime
+  staticContent    StaticContent? @relation(fields: [staticContenttId], references: [id])
+  staticContenttId Int?
+  videoContent     VideoContent?  @relation(fields: [videoContentId], references: [id])
+  videoContentId   Int?
 }
